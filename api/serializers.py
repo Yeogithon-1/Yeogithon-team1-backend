@@ -2,17 +2,18 @@ from rest_framework import serializers
 from .models import *
 
 
-class SubCommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubComment
-        fields = ['id', 'comment', 'author', 'content', 'like', 'created_at']
-
-
 class CommentSerializer(serializers.ModelSerializer):
+    reply = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
         fields = ['id', 'post', 'author',
-                  'content', 'like', 'created_at', 'sub_comment']
+                  'content', 'like', 'created_at', 'parent', 'reply']
+
+    def get_reply(self, instance):
+        serializer = self.__class__(instance.reply, many=True)
+        serializer.bind('', self)
+        return serializer.data
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -20,7 +21,8 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'author', 'content', 'created_at', 'comment']
+        fields = ['id', 'title', 'author', 'content',
+                  'created_at', 'category', 'comment']
 
 
 class UserSerializer(serializers.ModelSerializer):
