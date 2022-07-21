@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'yeogithon.urls'
+ROOT_URLCONF = 'drfunion-team1.urls'
 
 TEMPLATES = [
     {
@@ -78,7 +78,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'yeogithon.wsgi.application'
+WSGI_APPLICATION = 'drfunion-team1.wsgi.application'
 
 
 # Database
