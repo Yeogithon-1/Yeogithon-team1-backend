@@ -47,6 +47,25 @@ class CommentView(views.APIView):
             return Response({'message': '댓글 작성 성공', 'data': serializer.data})
         return Response({'message': '댓글 작성 실패', 'error': serializer.errors})
 
+    def get(self, request, pk, format=None):
+        comment = get_object_or_404(Comment, pk=pk)
+        serializer = CommentSerializer(comment)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        comment = get_object_or_404(Comment, pk=pk)
+        serializer = CommentSerializer(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                'message': '댓글 수정 성공', 'data': serializer.data})
+        return Response({'message': '댓글 수정 실패', 'error': serializer.errors})
+
+    def delete(self, request, pk, format=None):
+        comment = get_object_or_404(Comment, pk=pk)
+        comment.delete()
+        return Response()
+
 
 class SignUpView(views.APIView):
     def post(self, request, format=None):
