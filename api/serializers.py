@@ -3,17 +3,38 @@ from .models import *
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    reply = serializers.SerializerMethodField()
+    replies = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = ['id', 'post', 'author',
-                  'content', 'like', 'created_at', 'parent', 'reply']
+                  'content', 'like', 'created_at', 'parent', 'replies']
 
-    def get_reply(self, instance):
-        serializer = self.__class__(instance.reply, many=True)
+    def get_replies(self, instance):
+        serializer = self.__class__(instance.replies, many=True)
         serializer.bind('', self)
         return serializer.data
+
+
+class CommentChildSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['id', 'post', 'author', 'content', 'like', 'created_at']
+
+
+class CommentDetailSerializer(serializers.ModelSerializer):
+    replies = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id', 'author', 'parent', 'content', 'like', 'replies'
+        ]
+
+    def get_replies(self, obj):
+        if obj.is_parent:
+            return CommentChildSerializer(obj.children(), many=True).data
+        return None
 
 
 class PostSerializer(serializers.ModelSerializer):

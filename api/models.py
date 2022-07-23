@@ -14,6 +14,12 @@ class Post(models.Model):
     category = models.TextField(max_length=10, default="")
 
 
+class CommentManager(models.Manager):
+    def all(self):
+        qs = super(CommentManager, self).filter(parent=None)
+        return qs
+
+
 class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(
@@ -21,5 +27,16 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     content = models.TextField(max_length=200)
     parent = models.ForeignKey(
-        'self', related_name='reply', on_delete=models.CASCADE, null=True, blank=True)
+        'self', related_name='replies', on_delete=models.CASCADE, null=True, blank=True)
     like = models.IntegerField(default=0)
+
+    objects = CommentManager()
+
+    def children(self):
+        return Comment.objects.filter(parent=self)
+
+    @property
+    def is_parent(self):
+        if self.parent is not None:
+            return False
+        return True
