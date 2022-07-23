@@ -3,6 +3,7 @@ from .serializers import *
 from .models import *
 from rest_framework import views, generics
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 
 class PostListView(views.APIView):
@@ -39,9 +40,18 @@ class PostDetailView(views.APIView):
         return Response({'message': '게시글 삭제 성공'})
 
 
+class CommentLikeView(generics.UpdateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentLikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def partial_update(self, serializer):
+        serializer.save()
+
+
 class CommentView(views.APIView):
     def post(self, request, format=None):
-        serializer = CommentSerializer(data=request.data)
+        serializer = CommentDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': '댓글 작성 성공', 'data': serializer.data})
