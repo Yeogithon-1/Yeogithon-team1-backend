@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render
 from .serializers import *
 from .models import *
-from rest_framework import views
+from rest_framework import views, generics
 from rest_framework.response import Response
 
 
@@ -47,14 +47,21 @@ class CommentView(views.APIView):
             return Response({'message': '댓글 작성 성공', 'data': serializer.data})
         return Response({'message': '댓글 작성 실패', 'error': serializer.errors})
 
+    def get(self, request, format=None):
+        comments = Comment.objects.all()
+        serializer = CommentDetailSerializer(comments, many=True)
+        return Response(serializer.data)
+
+
+class CommentDetailView(views.APIView):
     def get(self, request, pk, format=None):
         comment = get_object_or_404(Comment, pk=pk)
-        serializer = CommentSerializer(comment)
+        serializer = CommentDetailSerializer(comment)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
         comment = get_object_or_404(Comment, pk=pk)
-        serializer = CommentSerializer(comment, data=request.data)
+        serializer = CommentDetailSerializer(comment, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({
