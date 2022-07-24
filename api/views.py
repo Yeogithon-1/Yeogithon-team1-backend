@@ -6,6 +6,15 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
+class MyPostList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Post.objects.filter(author=user)
+
+
 class PostLikeView(generics.UpdateAPIView):
     queryset = Post.objects.all()
     serializer_class = PostLikeSerializer
