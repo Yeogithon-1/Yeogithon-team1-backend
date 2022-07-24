@@ -6,6 +6,15 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
+class PostLikeView(generics.UpdateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostLikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def partial_update(self, serializer):
+        serializer.save()
+
+
 class PostListView(views.APIView):
     def get(self, request, format=None):
         posts = Post.objects.all()

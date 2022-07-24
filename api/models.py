@@ -12,6 +12,8 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
     tag = models.CharField(max_length=10, default="", null=True, blank=True)
+    like = models.ManyToManyField(
+        User, related_name='postlike')
 
 
 class Comment(models.Model):
