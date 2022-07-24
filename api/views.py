@@ -1,8 +1,28 @@
 from django.shortcuts import get_object_or_404, render
 from .serializers import *
 from .models import *
-from rest_framework import views
+from rest_framework import views, generics
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
+
+
+class MyPostList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PostSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Post.objects.filter(author=user)
+
+
+class PostLikeView(generics.UpdateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostLikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def partial_update(self, serializer):
+        serializer.save()
 
 
 class PostListView(views.APIView):
@@ -39,22 +59,53 @@ class PostDetailView(views.APIView):
         return Response({'message': '게시글 삭제 성공'})
 
 
+class PostSearchView(generics.ListAPIView):
+    serializer_class = PostSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        queryset_list = Post.objects.all()
+        query = self.request.GET.get("q")
+        if query:
+            queryset_list = queryset_list.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(comment__content__icontains=query)
+            ).distinct()
+        return queryset_list
+
+
+class CommentLikeView(generics.UpdateAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentLikeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def partial_update(self, serializer):
+        serializer.save()
+
+
 class CommentView(views.APIView):
     def post(self, request, format=None):
-        serializer = CommentSerializer(data=request.data)
+        serializer = CommentDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({'message': '댓글 작성 성공', 'data': serializer.data})
         return Response({'message': '댓글 작성 실패', 'error': serializer.errors})
 
+    def get(self, request, format=None):
+        comments = Comment.objects.filter(parent=None)
+        serializer = CommentDetailSerializer(comments, many=True)
+        return Response(serializer.data)
+
+
+class CommentDetailView(views.APIView):
     def get(self, request, pk, format=None):
         comment = get_object_or_404(Comment, pk=pk)
-        serializer = CommentSerializer(comment)
+        serializer = CommentDetailSerializer(comment)
         return Response(serializer.data)
 
     def put(self, request, pk, format=None):
         comment = get_object_or_404(Comment, pk=pk)
-        serializer = CommentSerializer(comment, data=request.data)
+        serializer = CommentDetailSerializer(comment, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({
