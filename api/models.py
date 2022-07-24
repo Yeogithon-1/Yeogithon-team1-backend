@@ -13,7 +13,17 @@ class Post(models.Model):
     content = models.TextField()
     tag = models.CharField(max_length=10, default="", null=True, blank=True)
     like = models.ManyToManyField(
-        User, related_name='postlike')
+        User, related_name='postlike', blank=True)
+
+
+class CommentManager(models.Manager):
+    def all(self):
+        qs = super(CommentManager, self).filter(parent=None)
+        return qs
+
+    def all2(self):
+        qs = super(CommentManager, self)
+        return qs
 
 
 class Comment(models.Model):
@@ -25,7 +35,9 @@ class Comment(models.Model):
     parent = models.ForeignKey(
         'self', related_name='replies', on_delete=models.CASCADE, null=True, blank=True)
     like = models.ManyToManyField(
-        User, related_name='like')
+        User, related_name='like', blank=True)
+
+    # objects = CommentManager()
 
     def children(self):
         return Comment.objects.filter(parent=self)

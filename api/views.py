@@ -4,6 +4,7 @@ from .models import *
 from rest_framework import views, generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 
 
 class MyPostList(generics.ListAPIView):
@@ -58,6 +59,21 @@ class PostDetailView(views.APIView):
         return Response({'message': '게시글 삭제 성공'})
 
 
+class PostSearchView(generics.ListAPIView):
+    serializer_class = PostSerializer
+
+    def get_queryset(self, *args, **kwargs):
+        queryset_list = Post.objects.all()
+        query = self.request.GET.get("q")
+        if query:
+            queryset_list = queryset_list.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(comment__content__icontains=query)
+            ).distinct()
+        return queryset_list
+
+
 class CommentLikeView(generics.UpdateAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentLikeSerializer
@@ -76,7 +92,7 @@ class CommentView(views.APIView):
         return Response({'message': '댓글 작성 실패', 'error': serializer.errors})
 
     def get(self, request, format=None):
-        comments = Comment.objects.all()
+        comments = Comment.objects.filter(parent=None)
         serializer = CommentDetailSerializer(comments, many=True)
         return Response(serializer.data)
 
