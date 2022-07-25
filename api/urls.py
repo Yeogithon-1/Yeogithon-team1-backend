@@ -12,6 +12,7 @@ urlpatterns = [
     path('comments/<int:pk>/like', CommentLikeView.as_view()),
     path('signup/', SignUpView.as_view()),
     path('login/', LoginView.as_view()),
+    path('logout/', LogoutView.as_view()),
     path('mypost/', MyPostList.as_view()),
     path('posts/search/', PostSearchView.as_view()),
 ]

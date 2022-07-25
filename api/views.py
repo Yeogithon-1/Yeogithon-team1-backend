@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404, render
 from .serializers import *
 from .models import *
-from rest_framework import views, generics
+from rest_framework import views, generics, response
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from django.contrib.auth import logout
+from rest_framework import status
 
 
 class MyPostList(generics.ListAPIView):
@@ -134,3 +136,9 @@ class LoginView(views.APIView):
         if serializer.is_valid():
             return Response({'message': "로그인 성공", 'data': serializer.data})
         return Response({'message': "로그인 실패", 'data': serializer.errors})
+
+
+class LogoutView(views.APIView):
+    def get(self, request, format=None):
+        logout(request)
+        return response.Response()
