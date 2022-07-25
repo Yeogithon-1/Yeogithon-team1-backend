@@ -34,7 +34,7 @@ class PostListView(views.APIView):
     def post(self, request, format=None):
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(author=self.request.user)
             return Response({'message': '게시글 작성 성공', 'data': serializer.data})
         return Response({'message': '게시글 작성 실패', 'error': serializer.errors})
 
