@@ -34,7 +34,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 CORS_ORIGIN_WHITELIST = (
-    "https://localhost:3000"
+    "https://localhost:3000",
 )
 
 CORS_ALLOW_METHODS = [
